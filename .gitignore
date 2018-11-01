@@ -1,0 +1,5 @@
+/.idea
+/build
+/cli
+/vendor
+/composer.lock

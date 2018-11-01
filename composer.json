@@ -1,0 +1,23 @@
+{
+  "name": "xtrait/stream",
+  "license": "MIT",
+  "description": "The XTrait's Stream module",
+  "authors": [
+    {
+      "name": "Lcfvs",
+      "email": "michael.rouges@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^7.2",
+    "xtrait/common": "@dev",
+    "psr/http-message": "^1.0",
+    "psr/http-factory": "^1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "XTrait\\": "src"
+    }
+  },
+  "minimum-stability": "dev"
+}
