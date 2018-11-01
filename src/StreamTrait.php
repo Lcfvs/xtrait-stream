@@ -309,9 +309,11 @@ namespace XTrait\Stream {
          */
         public function __toString()
         {
+            /* @todo merge catches & composer php > 7.2 */
             try {
                 return (string) @file_get_contents($this->getUri());
-            } catch (Error|Exception $e) {}
+            } catch (Error $e) {}
+            catch (Exception $e) {}
 
             return '';
         }
