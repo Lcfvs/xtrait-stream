@@ -317,14 +317,31 @@ namespace XTrait\Stream {
         }
 
         /**
+         * @param int $size
+         * @return bool
+         */
+        public function truncate(
+            int $size
+        )
+        {
+            $this->open();
+
+            return ftruncate($this->resource, $size);
+        }
+
+        /**
          * @return bool
          */
         public function unlink()
         {
+            $uri = $this->filename;
+
             if ($this->resource) {
                 $uri = $this->getMetadata('uri');
                 $this->close();
+            }
 
+            if (strlen($uri)) {
                 return unlink($uri);
             }
 

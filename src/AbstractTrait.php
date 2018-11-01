@@ -106,6 +106,14 @@ namespace XTrait\Stream {
         );
 
         /**
+         * @param int $size
+         * @return bool
+         */
+        abstract public function truncate(
+            int $size
+        );
+
+        /**
          * @return bool
          */
         abstract public function unlink();

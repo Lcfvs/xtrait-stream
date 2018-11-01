@@ -47,6 +47,14 @@ namespace XTrait\Stream {
         public function open();
 
         /**
+         * @param int $size
+         * @return bool
+         */
+        public function truncate(
+            int $size
+        );
+
+        /**
          * Tries to unlink the resource
          *
          * @return bool
