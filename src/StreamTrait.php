@@ -24,17 +24,33 @@ namespace XTrait\Stream {
         private $mode;
 
         /**
+         * @var bool $useIncludePath
+         */
+        private $useIncludePath = false;
+
+        /**
+         * @var resource $context
+         */
+        private $context;
+
+        /**
          * StreamTrait constructor.
          * @param string $filename
          * @param string $mode
+         * @param bool $useIncludePath
+         * @param null $context
          */
         public function __construct(
             string $filename,
-            string $mode = FlagInterface::FLAG_R_BOF_BIN
+            string $mode = FlagInterface::FLAG_R_BOF_BIN,
+            bool $useIncludePath = false,
+            $context = null
         )
         {
             $this->filename = $filename;
             $this->mode = $mode;
+            $this->useIncludePath = $useIncludePath;
+            $this->context = $context;
         }
 
         /**
@@ -44,10 +60,21 @@ namespace XTrait\Stream {
         {
             if (is_null($this->resource)) {
                 if (is_null($this->filename)) {
-                    $this->resource = tmpfile();
+                    $resource = tmpfile();
                 } else {
-                    $this->resource = fopen($this->filename, $this->mode);
+                    $uri = $this->filename;
+                    $mode = $this->mode;
+                    $include = $this->useIncludePath;
+                    $context = $this->context;
+
+                    if ($context) {
+                        $resource = fopen($uri, $mode, $include, $context);
+                    } else {
+                        $resource = fopen($uri, $mode, $include);
+                    }
                 }
+
+                $this->resource = $resource;
             }
 
             return $this;
@@ -312,8 +339,8 @@ namespace XTrait\Stream {
             /* @todo merge catches & composer php > 7.2 */
             try {
                 return (string) @file_get_contents($this->getUri());
-            } catch (Error $e) {}
-            catch (Exception $e) {}
+            } catch (Error $e) {
+            } catch (Exception $e) {}
 
             return '';
         }

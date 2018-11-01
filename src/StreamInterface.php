@@ -2,7 +2,7 @@
 
 namespace XTrait\Stream {
 
-    use Psr\Http\Message\StreamInterface;
+    use Psr\Http\Message\StreamInterface as PsrStreamInterface;
 
     /**
      * Describes a late data stream.
@@ -16,9 +16,23 @@ namespace XTrait\Stream {
      * (e.g. for an UploadedFileInterface), where the file is broken for any
      * reason, or just to avoid to open some files which aren't really used.
      */
-    interface LateStreamInterface
-        extends StreamInterface
+    interface StreamInterface
+        extends PsrStreamInterface
     {
+        /**
+         * StreamTrait constructor.
+         * @param string $filename
+         * @param string $mode
+         * @param bool $useIncludePath
+         * @param null $context
+         */
+        public function __construct(
+            string $filename,
+            string $mode = FlagInterface::FLAG_R_BOF_BIN,
+            bool $useIncludePath = false,
+            $context = null
+        );
+
         /**
          * Returns the stream resource, if any
          *

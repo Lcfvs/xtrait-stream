@@ -5,6 +5,20 @@ namespace XTrait\Stream {
     trait AbstractTrait
     {
         /**
+         * StreamTrait constructor.
+         * @param string $filename
+         * @param string $mode
+         * @param bool $useIncludePath
+         * @param null $context
+         */
+        abstract public function __construct(
+            string $filename,
+            string $mode = FlagInterface::FLAG_R_BOF_BIN,
+            bool $useIncludePath = false,
+            $context = null
+        );
+
+        /**
          * @return string
          */
         abstract public function __toString();
