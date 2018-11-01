@@ -4,8 +4,9 @@ namespace XTrait\Stream\Factory {
 
     use XTrait\Common;
     use XTrait\Stream;
+    use XTrait\Stream\StreamInterface;
     use XTrait\Stream\FlagInterface;
-    use Psr\Http\Message\StreamInterface;
+    use Psr\Http\Message\StreamInterface as PsrStreamInterface;
 
     trait FactoryTrait
     {
@@ -14,11 +15,11 @@ namespace XTrait\Stream\Factory {
 
         /**
          * @param string $content
-         * @return StreamInterface
+         * @return StreamInterface|PsrStreamInterface
          */
         public function createStream(
             string $content = ''
-        ): StreamInterface
+        ): PsrStreamInterface
         {
             $stream = $this->createStreamFromResource(tmpfile());
             $stream->write($content);
@@ -29,12 +30,12 @@ namespace XTrait\Stream\Factory {
         /**
          * @param string $filename
          * @param string $mode
-         * @return StreamInterface
+         * @return StreamInterface|PsrStreamInterface
          */
         public function createStreamFromFile(
             string $filename,
             string $mode =  FlagInterface::FLAG_R_BOF_BIN
-        ): StreamInterface
+        ): PsrStreamInterface
         {
             $resource = fopen($filename, $mode) ?: null;
 
@@ -43,11 +44,11 @@ namespace XTrait\Stream\Factory {
 
         /**
          * @param $resource
-         * @return StreamInterface
+         * @return StreamInterface|PsrStreamInterface
          */
         public function createStreamFromResource(
             $resource
-        ): StreamInterface
+        ): PsrStreamInterface
         {
             return (new Stream(''))
                 ->withResource($resource);

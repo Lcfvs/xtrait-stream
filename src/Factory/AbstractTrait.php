@@ -19,7 +19,7 @@ namespace XTrait\Stream\Factory {
          */
         abstract public function createStream(
             string $content = ''
-        ): StreamInterface;
+        ): PsrStreamInterface;
 
         /**
          * @param string $filename
@@ -29,7 +29,7 @@ namespace XTrait\Stream\Factory {
         abstract public function createStreamFromFile(
             string $filename,
             string $mode = FlagInterface::FLAG_R_BOF_BIN
-        ): StreamInterface;
+        ): PsrStreamInterface;
 
         /**
          * @param resource $resource
@@ -37,6 +37,6 @@ namespace XTrait\Stream\Factory {
          */
         abstract public function createStreamFromResource(
             $resource
-        ): StreamInterface;
+        ): PsrStreamInterface;
     }
 }
