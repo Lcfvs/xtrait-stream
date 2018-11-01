@@ -8,6 +8,8 @@ namespace XTrait\Stream {
 
     trait StreamTrait
     {
+        use AbstractTrait;
+
         /**
          * @var resource|bool|null $resource
          */
@@ -375,6 +377,37 @@ namespace XTrait\Stream {
          * @param resource|object|null $context
          * @return null|static
          */
+        public function copy(
+            string $name,
+            object $context = null
+        )
+        {
+            $uri = $this->getFilename();
+
+            if (strlen($uri)) {
+                if ($context) {
+                    $result = copy($uri, $name, $context);
+                } else {
+                    $result = copy($uri, $name);
+                }
+
+                if ($result) {
+                    return (clone $this)
+                        ->setResource(null)
+                        ->setFilename($name)
+                        ->setMode($this->mode)
+                        ->setContext($context);
+                }
+            }
+
+            return null;
+        }
+
+        /**
+         * @param string $name
+         * @param resource|object|null $context
+         * @return null|static
+         */
         public function rename(
             string $name,
             object $context = null
@@ -390,6 +423,8 @@ namespace XTrait\Stream {
                 }
 
                 if ($result) {
+                    $this->close();
+
                     return (clone $this)
                         ->setResource(null)
                         ->setFilename($name)

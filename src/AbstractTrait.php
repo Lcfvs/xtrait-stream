@@ -124,6 +124,16 @@ namespace XTrait\Stream {
          * @param resource|object|null $context
          * @return null|static
          */
+        abstract public function copy(
+            string $name,
+            object $context = null
+        );
+
+        /**
+         * @param string $name
+         * @param resource|object|null $context
+         * @return null|static
+         */
         abstract public function rename(
             string $name,
             object $context = null

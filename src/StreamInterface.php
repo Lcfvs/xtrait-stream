@@ -24,13 +24,13 @@ namespace XTrait\Stream {
          * @param string $filename
          * @param string $mode
          * @param bool $useIncludePath
-         * @param null $context
+         * @param resource|object|null $context
          */
         public function __construct(
             string $filename,
             string $mode = FlagInterface::FLAG_R_BOF_BIN,
             bool $useIncludePath = false,
-            $context = null
+            object $context = null
         );
 
         /**
@@ -59,6 +59,16 @@ namespace XTrait\Stream {
          * @return $this
          */
         public function open();
+
+        /**
+         * @param string $name
+         * @param resource|object|null $context
+         * @return null|static
+         */
+        public function copy(
+            string $name,
+            object $context = null
+        );
 
         /**
          * @param string $name
