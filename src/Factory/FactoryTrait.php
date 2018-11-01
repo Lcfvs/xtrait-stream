@@ -30,16 +30,18 @@ namespace XTrait\Stream\Factory {
         /**
          * @param string $filename
          * @param string $mode
+         * @param bool $useIncludePath
+         * @param resource|object|null $context
          * @return StreamInterface|PsrStreamInterface
          */
         public function createStreamFromFile(
             string $filename,
-            string $mode =  FlagInterface::FLAG_R_BOF_BIN
+            string $mode = FlagInterface::FLAG_R_BOF_BIN,
+            bool $useIncludePath = false,
+            object $context = null
         ): PsrStreamInterface
         {
-            $resource = fopen($filename, $mode) ?: null;
-
-            return $this->createStreamFromResource($resource);
+            return new Stream($filename, $mode, $useIncludePath, $context);
         }
 
         /**
@@ -50,7 +52,7 @@ namespace XTrait\Stream\Factory {
             $resource
         ): PsrStreamInterface
         {
-            return (new Stream(''))
+            return $this->createStreamFromFile('')
                 ->withResource($resource);
         }
     }

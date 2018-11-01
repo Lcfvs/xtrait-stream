@@ -38,13 +38,13 @@ namespace XTrait\Stream {
          * @param string $filename
          * @param string $mode
          * @param bool $useIncludePath
-         * @param null $context
+         * @param resource|object|null $context
          */
         public function __construct(
             string $filename,
             string $mode = FlagInterface::FLAG_R_BOF_BIN,
             bool $useIncludePath = false,
-            $context = null
+            object $context = null
         )
         {
             $this->filename = $filename;
@@ -86,6 +86,18 @@ namespace XTrait\Stream {
         public function getResource()
         {
             return $this->resource;
+        }
+
+        /**
+         * @return null|string
+         */
+        public function getFilename(): ?string
+        {
+            if ($this->resource) {
+                return $this->getMetadata('uri');
+            }
+
+            return $this->filename;
         }
 
         /**
@@ -147,6 +159,19 @@ namespace XTrait\Stream {
         }
 
         /**
+         * @param resource|object|null $context
+         * @return $this
+         */
+        private function setContext(
+            object $context = null
+        )
+        {
+            $this->context = $context;
+
+            return $this;
+        }
+
+        /**
          * @inheritDoc
          */
         public function close()
@@ -154,10 +179,10 @@ namespace XTrait\Stream {
             $resource = $this->resource;
 
             if ($resource) {
-                $uri = $this->getMetadata('uri');
+                $uri = $this->getFilename();
                 fclose($resource);
 
-                if (!is_file($uri)) {
+                if (strlen($uri) && !is_file($uri)) {
                     $this->setFilename(null);
                     $this->setMode(null);
                 }
@@ -346,6 +371,37 @@ namespace XTrait\Stream {
         }
 
         /**
+         * @param string $name
+         * @param resource|object|null $context
+         * @return null|static
+         */
+        public function rename(
+            string $name,
+            object $context = null
+        )
+        {
+            $uri = $this->getFilename();
+
+            if (strlen($uri)) {
+                if ($context) {
+                    $result = rename($uri, $name, $context);
+                } else {
+                    $result = rename($uri, $name);
+                }
+
+                if ($result) {
+                    return (clone $this)
+                        ->setResource(null)
+                        ->setFilename($name)
+                        ->setMode($this->mode)
+                        ->setContext($context);
+                }
+            }
+
+            return null;
+        }
+
+        /**
          * @param int $size
          * @return bool
          */
@@ -363,10 +419,9 @@ namespace XTrait\Stream {
          */
         public function unlink()
         {
-            $uri = $this->filename;
+            $uri = $this->getFilename();
 
             if ($this->resource) {
-                $uri = $this->getMetadata('uri');
                 $this->close();
             }
 

@@ -9,13 +9,13 @@ namespace XTrait\Stream {
          * @param string $filename
          * @param string $mode
          * @param bool $useIncludePath
-         * @param null $context
+         * @param resource|object|null $context
          */
         abstract public function __construct(
             string $filename,
             string $mode = FlagInterface::FLAG_R_BOF_BIN,
             bool $useIncludePath = false,
-            $context = null
+            object $context = null
         );
 
         /**
@@ -117,6 +117,16 @@ namespace XTrait\Stream {
          */
         abstract public function getMetadata(
             $key = null
+        );
+
+        /**
+         * @param string $name
+         * @param resource|object|null $context
+         * @return null|static
+         */
+        abstract public function rename(
+            string $name,
+            object $context = null
         );
 
         /**

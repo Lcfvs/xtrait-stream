@@ -61,6 +61,16 @@ namespace XTrait\Stream {
         public function open();
 
         /**
+         * @param string $name
+         * @param resource|object|null $context
+         * @return null|static
+         */
+        public function rename(
+            string $name,
+            object $context = null
+        );
+
+        /**
          * @param int $size
          * @return bool
          */

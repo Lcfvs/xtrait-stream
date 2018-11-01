@@ -24,11 +24,15 @@ namespace XTrait\Stream\Factory {
         /**
          * @param string $filename
          * @param string $mode
+         * @param bool $useIncludePath
+         * @param resource|object|null $context
          * @return StreamInterface|PsrStreamInterface
          */
         abstract public function createStreamFromFile(
             string $filename,
-            string $mode = FlagInterface::FLAG_R_BOF_BIN
+            string $mode = FlagInterface::FLAG_R_BOF_BIN,
+            bool $useIncludePath = false,
+            object $context = null
         ): PsrStreamInterface;
 
         /**
