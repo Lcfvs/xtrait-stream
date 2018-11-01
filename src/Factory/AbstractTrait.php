@@ -4,6 +4,7 @@ namespace XTrait\Stream\Factory {
 
     use XTrait\Stream\FlagInterface;
     use Psr\Http\Message\StreamInterface;
+    use XTrait\Stream\LateStreamInterface;
 
     trait AbstractTrait
     {
@@ -14,7 +15,7 @@ namespace XTrait\Stream\Factory {
 
         /**
          * @param string $content
-         * @return StreamInterface
+         * @return LateStreamInterface|StreamInterface
          */
         abstract public function createStream(
             string $content = ''
@@ -23,7 +24,7 @@ namespace XTrait\Stream\Factory {
         /**
          * @param string $filename
          * @param string $mode
-         * @return StreamInterface
+         * @return LateStreamInterface|StreamInterface
          */
         abstract public function createStreamFromFile(
             string $filename,
@@ -32,7 +33,7 @@ namespace XTrait\Stream\Factory {
 
         /**
          * @param resource $resource
-         * @return StreamInterface
+         * @return LateStreamInterface|StreamInterface
          */
         abstract public function createStreamFromResource(
             $resource
