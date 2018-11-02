@@ -16,7 +16,8 @@
   },
   "autoload": {
     "psr-4": {
-      "XTrait\\": "src"
+      "XTrait\\": "src",
+      "XTrait\\Common\\": "../common/src"
     }
   },
   "minimum-stability": "dev"
