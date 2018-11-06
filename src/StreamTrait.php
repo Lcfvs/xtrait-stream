@@ -5,6 +5,7 @@ namespace XTrait\Stream {
     use Error;
     use Exception;
     use InvalidArgumentException;
+    use RuntimeException;
 
     trait StreamTrait
     {
@@ -56,9 +57,55 @@ namespace XTrait\Stream {
         }
 
         /**
+         * @return string
+         */
+        public function __toString()
+        {
+            try {
+                return (string) @file_get_contents($this->getUri());
+            } catch (Error | Exception $e) {}
+
+            return '';
+        }
+
+        /**
+         * @return bool|null|resource
+         */
+        public function getResource()
+        {
+            return $this->resource;
+        }
+
+        /**
+         * @param bool|null|resource $resource
+         * @return static
+         */
+        public function withResource(
+            $resource = null
+        ): StreamInterface
+        {
+            return (clone $this)
+                ->setFilename(null)
+                ->setMode(null)
+                ->setResource($resource);
+        }
+
+        /**
+         * @return null|string
+         */
+        public function getUri(): ?string
+        {
+            if ($this->resource) {
+                return $this->getMetadata('uri');
+            }
+
+            return $this->filename;
+        }
+
+        /**
          * @return $this
          */
-        public function open()
+        public function open(): StreamInterface
         {
             if (is_null($this->resource)) {
                 if (is_null($this->filename)) {
@@ -83,37 +130,316 @@ namespace XTrait\Stream {
         }
 
         /**
-         * @return bool|null|resource
+         * @return $this
          */
-        public function getResource()
+        public function close(): StreamInterface
         {
-            return $this->resource;
-        }
+            $resource = $this->resource;
 
-        /**
-         * @return null|string
-         */
-        public function getFilename(): ?string
-        {
-            if ($this->resource) {
-                return $this->getMetadata('uri');
+            if ($resource) {
+                $uri = $this->getUri();
+                fclose($resource);
+
+                if (strlen($uri) && !is_file($uri)) {
+                    $this->setFilename(null);
+                    $this->setMode(null);
+                }
             }
 
-            return $this->filename;
+            $this->detach();
+
+            return $this;
         }
 
         /**
-         * @param bool|null|resource $resource
-         * @return static
+         * @inheritDoc
          */
-        public function withResource(
-            $resource = null
+        public function detach()
+        {
+            $resource = $this->resource;
+
+            if ($resource) {
+                $this->resource = null;
+            }
+
+            return $resource;
+        }
+
+        /**
+         * @return int|null
+         */
+        public function getSize()
+        {
+            $this->open();
+
+            return is_null($this->resource)
+                ? null
+                : filesize($this->getUri());
+        }
+
+        /**
+         * @return int
+         * @throws RuntimeException
+         */
+        public function tell()
+        {
+            $this->open();
+
+            return ftell($this->resource);
+        }
+
+        /**
+         * @return bool
+         */
+        public function eof()
+        {
+            $this->open();
+
+            return !is_null($this->resource)
+                && feof($this->resource);
+        }
+
+        /**
+         * @return bool
+         */
+        public function isSeekable()
+        {
+            $this->open();
+
+            return !is_null($this->resource)
+                && $this->getMetadata('seekable');
+        }
+
+        /**
+         * @param int $offset
+         * @param int $whence
+         * @param bool|null &$success
+         * @return $this|StreamInterface
+         * @throws RuntimeException
+         */
+        public function seek(
+            $offset,
+            $whence = \SEEK_SET,
+            bool &$success = null
+        ): StreamInterface
+        {
+            if (!$this->isSeekable()) {
+                throw new RuntimeException('Unable to seek');
+            }
+
+            $success = fseek($this->resource, $offset, $whence) !== -1;
+
+            return $this;
+        }
+
+        /**
+         * @param bool|null &$success
+         * @return $this
+         * @throws RuntimeException on failure.
+         */
+        public function rewind(
+            bool &$success = null
+        ): StreamInterface
+        {
+            $this->open();
+
+            $success = rewind($this->resource);
+
+            return $this;
+        }
+
+        /**
+         * @return bool
+         */
+        public function isWritable()
+        {
+            $this->open();
+            $mode = $this->getMetadata('mode');
+
+            return in_array($mode, FlagInterface::WRITABLES);
+        }
+
+        /**
+         * @param string $string
+         * @param int|null
+         * @return $this|StreamInterface
+         * @throws RuntimeException
+         */
+        public function write(
+            string $string,
+            int &$written = null
+        ): StreamInterface
+        {
+            $this->open();
+
+            $written = fwrite($this->resource, $string);
+
+            return $this;
+        }
+
+        /**
+         * @return bool
+         */
+        public function isReadable()
+        {
+            $this->open();
+            $mode = $this->getMetadata('mode');
+
+            return in_array($mode, FlagInterface::READABLES);
+        }
+
+        /**
+         * @param int $length
+         * @return string
+         * @throws RuntimeException
+         */
+        public function read(
+            int $length
+        ): string
+        {
+            $this->open();
+
+            return fread($this->resource, $length);
+        }
+
+        /**
+         * @return string
+         * @throws RuntimeException
+         */
+        public function getContents(): string
+        {
+            $this->open();
+
+            return stream_get_contents($this->resource);
+        }
+
+        /**
+         * @param string $key
+         * @return array|mixed|null
+         */
+        public function getMetadata(
+            string $key = null
         )
         {
-            return (clone $this)
-                ->setFilename(null)
-                ->setMode(null)
-                ->setResource($resource);
+            $this->open();
+            $data = stream_get_meta_data($this->resource);
+
+            if (is_null($key)) {
+                return $data;
+            }
+
+            return $data[$key] ?? null;
+        }
+
+        /**
+         * @param string $target
+         * @param resource|object|null $context
+         * @param StreamInterface|null &$newStream
+         * @return $this
+         * @throws RuntimeException
+         */
+        public function copy(
+            string $target,
+            object $context = null,
+            StreamInterface &$newStream = null
+        ): StreamInterface
+        {
+            $uri = $this->getUri();
+
+            if (strlen($uri)) {
+                if ($context) {
+                    $result = copy($uri, $target, $context);
+                } else {
+                    $result = copy($uri, $target);
+                }
+
+                if ($result) {
+                    $newStream = (clone $this)
+                        ->setResource(null)
+                        ->setFilename($target)
+                        ->setMode($this->mode)
+                        ->setContext($context);
+                }
+            }
+
+            return $this;
+        }
+
+        /**
+         * @param string $target
+         * @param resource|object|null $context
+         * @param StreamInterface|null &$newStream
+         * @return $this
+         * @throws RuntimeException
+         */
+        public function rename(
+            string $target,
+            object $context = null,
+            StreamInterface &$newStream = null
+        ): StreamInterface
+        {
+            $uri = $this->getUri();
+
+            if (strlen($uri)) {
+                if ($context) {
+                    $result = rename($uri, $target, $context);
+                } else {
+                    $result = rename($uri, $target);
+                }
+
+                if ($result) {
+                    $this->close();
+
+                    $newStream = (clone $this)
+                        ->setResource(null)
+                        ->setFilename($target)
+                        ->setMode($this->mode)
+                        ->setContext($context);
+                }
+            }
+
+            return $this;
+        }
+
+        /**
+         * @param int $size
+         * @param bool|null &$success
+         * @return $this|StreamInterface
+         * @throws RuntimeException
+         */
+        public function truncate(
+            int $size,
+            bool &$success = null
+        ): StreamInterface
+        {
+            $this->open();
+
+            $success = ftruncate($this->resource, $size);
+
+            return $this;
+        }
+
+        /**
+         * @param bool|null &$success
+         * @return $this|StreamInterface
+         * @throws RuntimeException
+         */
+        public function unlink(
+            bool &$success = null
+        ): StreamInterface
+        {
+            $uri = $this->getUri();
+            $success = false;
+
+            if ($this->resource) {
+                $this->close();
+            }
+
+            if (strlen($uri)) {
+                $success = unlink($uri);
+            }
+
+            return $this;
         }
 
         /**
@@ -171,300 +497,6 @@ namespace XTrait\Stream {
             $this->context = $context;
 
             return $this;
-        }
-
-        /**
-         * @inheritDoc
-         */
-        public function close()
-        {
-            $resource = $this->resource;
-
-            if ($resource) {
-                $uri = $this->getFilename();
-                fclose($resource);
-
-                if (strlen($uri) && !is_file($uri)) {
-                    $this->setFilename(null);
-                    $this->setMode(null);
-                }
-            }
-
-            return $this->detach();
-        }
-
-        /**
-         * @inheritDoc
-         */
-        public function detach()
-        {
-            $resource = $this->resource;
-
-            if ($resource) {
-                $this->resource = null;
-            }
-
-            return $resource;
-        }
-
-        /**
-         * @inheritdoc
-         */
-        public function getSize()
-        {
-            $this->open();
-
-            return is_null($this->resource)
-                ? null
-                : filesize($this->getUri());
-        }
-
-        /**
-         * @inheritDoc
-         */
-        public function tell()
-        {
-            $this->open();
-
-            return ftell($this->resource);
-        }
-
-        /**
-         * @inheritdoc
-         */
-        public function eof()
-        {
-            $this->open();
-
-            return !is_null($this->resource)
-                && feof($this->resource);
-        }
-
-        /**
-         * @inheritDoc
-         */
-        public function isSeekable()
-        {
-            $this->open();
-
-            return !is_null($this->resource)
-                && $this->getMetadata('seekable');
-        }
-
-        /**
-         * @inheritdoc
-         */
-        public function seek(
-            $offset,
-            $whence = \SEEK_SET
-        )
-        {
-            $this->open();
-
-            return fseek($this->resource, $offset, $whence);
-        }
-
-        /**
-         * @inheritdoc
-         */
-        public function rewind()
-        {
-            $this->open();
-
-            rewind($this->resource);
-        }
-
-        /**
-         * @inheritdoc
-         */
-        public function isWritable()
-        {
-            $this->open();
-            $mode = $this->getMetadata('mode');
-
-            return in_array($mode, FlagInterface::WRITABLES);
-        }
-
-        /**
-         * @inheritDoc
-         */
-        public function write(
-            $string
-        )
-        {
-            $this->open();
-
-            return fwrite($this->resource, $string);
-        }
-
-        /**
-         * @inheritdoc
-         */
-        public function isReadable()
-        {
-            $this->open();
-            $mode = $this->getMetadata('mode');
-
-            return in_array($mode, FlagInterface::READABLES);
-        }
-
-        /**
-         * @inheritDoc
-         */
-        public function read(
-            $length
-        )
-        {
-            $this->open();
-
-            return fread($this->resource, $length);
-        }
-
-        /**
-         * @return string|null
-         */
-        public function getUri()
-        {
-            $this->open();
-
-            return $this->getMetadata('uri');
-        }
-
-        /**
-         * @inheritDoc
-         */
-        public function getContents()
-        {
-            $this->open();
-
-            return stream_get_contents($this->resource);
-        }
-
-        /**
-         * @param null $key
-         * @return array|mixed|null
-         */
-        public function getMetadata(
-            $key = null
-        )
-        {
-            $this->open();
-            $data = stream_get_meta_data($this->resource);
-
-            if (is_null($key)) {
-                return $data;
-            }
-
-            return $data[$key] ?? null;
-        }
-
-        /**
-         * @return string
-         */
-        public function __toString()
-        {
-            /* @todo merge catches & composer php > 7.2 */
-            try {
-                return (string) @file_get_contents($this->getUri());
-            } catch (Error $e) {
-            } catch (Exception $e) {}
-
-            return '';
-        }
-
-        /**
-         * @param string $name
-         * @param resource|object|null $context
-         * @return null|static
-         */
-        public function copy(
-            string $name,
-            object $context = null
-        )
-        {
-            $uri = $this->getFilename();
-
-            if (strlen($uri)) {
-                if ($context) {
-                    $result = copy($uri, $name, $context);
-                } else {
-                    $result = copy($uri, $name);
-                }
-
-                if ($result) {
-                    return (clone $this)
-                        ->setResource(null)
-                        ->setFilename($name)
-                        ->setMode($this->mode)
-                        ->setContext($context);
-                }
-            }
-
-            return null;
-        }
-
-        /**
-         * @param string $name
-         * @param resource|object|null $context
-         * @return null|static
-         */
-        public function rename(
-            string $name,
-            object $context = null
-        )
-        {
-            $uri = $this->getFilename();
-
-            if (strlen($uri)) {
-                if ($context) {
-                    $result = rename($uri, $name, $context);
-                } else {
-                    $result = rename($uri, $name);
-                }
-
-                if ($result) {
-                    $this->close();
-
-                    return (clone $this)
-                        ->setResource(null)
-                        ->setFilename($name)
-                        ->setMode($this->mode)
-                        ->setContext($context);
-                }
-            }
-
-            return null;
-        }
-
-        /**
-         * @param int $size
-         * @return bool
-         */
-        public function truncate(
-            int $size
-        )
-        {
-            $this->open();
-
-            return ftruncate($this->resource, $size);
-        }
-
-        /**
-         * @return bool
-         */
-        public function unlink()
-        {
-            $uri = $this->getFilename();
-
-            if ($this->resource) {
-                $this->close();
-            }
-
-            if (strlen($uri)) {
-                return unlink($uri);
-            }
-
-            return false;
         }
     }
 }

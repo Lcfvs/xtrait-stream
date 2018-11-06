@@ -2,10 +2,11 @@
 
 namespace XTrait\Stream {
 
+    use RuntimeException;
+
     trait AbstractTrait
     {
         /**
-         * StreamTrait constructor.
          * @param string $filename
          * @param string $mode
          * @param bool $useIncludePath
@@ -24,24 +25,35 @@ namespace XTrait\Stream {
         abstract public function __toString();
 
         /**
+         * @param resource|object $resource
+         * @return StreamInterface
+         */
+        abstract public function withResource(
+            object $resource
+        ): StreamInterface;
+
+        /**
          * @return resource|bool|null
          */
         abstract public function getResource();
 
         /**
-         * @param resource $resource
-         * @return static
+         * @return null|string
          */
-        abstract public function withResource(
-            $resource
-        );
-
-        abstract public function open();
-
-        abstract public function close();
+        abstract public function getUri(): ?string;
 
         /**
-         * @return null|resource
+         * @return $this|StreamInterface
+         */
+        abstract public function open(): StreamInterface;
+
+        /**
+         * @return $this|StreamInterface
+         */
+        abstract public function close(): StreamInterface;
+
+        /**
+         * @return resource|null
          */
         abstract public function detach();
 
@@ -52,6 +64,7 @@ namespace XTrait\Stream {
 
         /**
          * @return int
+         * @throws RuntimeException
          */
         abstract public function tell();
 
@@ -68,17 +81,24 @@ namespace XTrait\Stream {
         /**
          * @param int $offset
          * @param int $whence
-         * @return mixed
+         * @param bool|null &$success
+         * @return $this|StreamInterface
+         * @throws RuntimeException
          */
         abstract public function seek(
-            $offset,
-            $whence = SEEK_SET
-        );
+            int $offset,
+            int $whence = SEEK_SET,
+            bool &$success = null
+        ): StreamInterface;
 
         /**
-         * @return mixed
+         * @param bool|null &$success
+         * @return $this|StreamInterface
+         * @throws RuntimeException on failure.
          */
-        abstract public function rewind();
+        abstract public function rewind(
+            bool &$success = null
+        ): StreamInterface;
 
         /**
          * @return bool
@@ -87,11 +107,14 @@ namespace XTrait\Stream {
 
         /**
          * @param string $string
-         * @return int
+         * @param int|null
+         * @return $this|StreamInterface
+         * @throws RuntimeException
          */
         abstract public function write(
-            $string
-        );
+            string $string,
+            int &$written = null
+        ): StreamInterface;
 
         /**
          * @return bool
@@ -101,55 +124,70 @@ namespace XTrait\Stream {
         /**
          * @param int $length
          * @return string
+         * @throws RuntimeException
          */
         abstract public function read(
-            $length
-        );
+            int $length
+        ): string;
 
         /**
          * @return string
+         * @throws RuntimeException
          */
-        abstract public function getContents();
+        abstract public function getContents(): string;
 
         /**
-         * @param null|string $key
+         * @param string $key
          * @return array|mixed|null
          */
         abstract public function getMetadata(
-            $key = null
+            string $key = null
         );
 
         /**
-         * @param string $name
+         * @param string $target
          * @param resource|object|null $context
-         * @return null|static
+         * @param StreamInterface|null &$newStream
+         * @return $this|StreamInterface
+         * @throws RuntimeException
          */
         abstract public function copy(
-            string $name,
-            object $context = null
-        );
+            string $target,
+            object $context = null,
+            StreamInterface &$newStream = null
+        ): StreamInterface;
 
         /**
-         * @param string $name
+         * @param string $target
          * @param resource|object|null $context
-         * @return null|static
+         * @param StreamInterface|null &$newStream
+         * @return $this|StreamInterface
+         * @throws RuntimeException
          */
         abstract public function rename(
-            string $name,
-            object $context = null
-        );
+            string $target,
+            object $context = null,
+            StreamInterface &$newStream = null
+        ): StreamInterface;
 
         /**
          * @param int $size
-         * @return bool
+         * @param bool|null &$success
+         * @return $this|StreamInterface
+         * @throws RuntimeException
          */
         abstract public function truncate(
-            int $size
-        );
+            int $size,
+            bool &$success = null
+        ): StreamInterface;
 
         /**
-         * @return bool
+         * @param bool|null &$success
+         * @return $this|StreamInterface
+         * @throws RuntimeException
          */
-        abstract public function unlink();
+        abstract public function unlink(
+            bool &$success = null
+        ): StreamInterface;
     }
 }

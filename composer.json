@@ -1,18 +1,20 @@
 {
-  "name": "xtrait/stream",
+  "name": "x-trait/stream",
   "license": "MIT",
   "description": "The XTrait's Stream module",
   "authors": [
     {
       "name": "Lcfvs",
       "email": "michael.rouges@gmail.com"
+    },
+    {
+      "name": "PHP-FIG",
+      "homepage": "http://www.php-fig.org/"
     }
   ],
   "require": {
     "php": "^7.0",
-    "xtrait/common": "@dev",
-    "psr/http-message": "^1.0",
-    "psr/http-factory": "^1.0"
+    "x-trait/common": "@dev"
   },
   "autoload": {
     "psr-4": {
