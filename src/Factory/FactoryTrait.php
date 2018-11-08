@@ -4,8 +4,8 @@ namespace XTrait\Stream\Factory {
 
     use XTrait\Common;
     use XTrait\Stream;
-    use XTrait\Stream\StreamInterface;
     use XTrait\Stream\FlagInterface;
+    use XTrait\Stream\StreamInterface;
 
     trait FactoryTrait
     {

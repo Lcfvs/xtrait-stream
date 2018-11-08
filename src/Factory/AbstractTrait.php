@@ -3,7 +3,6 @@
 namespace XTrait\Stream\Factory {
 
     use XTrait\Stream\FlagInterface;
-    use Psr\Http\Message\StreamInterface as PsrStreamInterface;
     use XTrait\Stream\StreamInterface;
 
     trait AbstractTrait
@@ -15,32 +14,32 @@ namespace XTrait\Stream\Factory {
 
         /**
          * @param string $content
-         * @return StreamInterface|PsrStreamInterface
+         * @return StreamInterface
          */
         abstract public function createStream(
             string $content = ''
-        ): PsrStreamInterface;
+        ): StreamInterface;
 
         /**
          * @param string $filename
          * @param string $mode
          * @param bool $useIncludePath
          * @param resource|object|null $context
-         * @return StreamInterface|PsrStreamInterface
+         * @return StreamInterface
          */
         abstract public function createStreamFromFile(
             string $filename,
             string $mode = FlagInterface::FLAG_R_BOF_BIN,
             bool $useIncludePath = false,
             object $context = null
-        ): PsrStreamInterface;
+        ): StreamInterface;
 
         /**
          * @param resource $resource
-         * @return StreamInterface|PsrStreamInterface
+         * @return StreamInterface
          */
         abstract public function createStreamFromResource(
             $resource
-        ): PsrStreamInterface;
+        ): StreamInterface;
     }
 }
