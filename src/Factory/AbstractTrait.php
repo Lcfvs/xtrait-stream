@@ -35,11 +35,11 @@ namespace XTrait\Stream\Factory {
         ): StreamInterface;
 
         /**
-         * @param resource $resource
+         * @param resource|object $resource
          * @return StreamInterface
          */
         abstract public function createStreamFromResource(
-            $resource
+            object $resource
         ): StreamInterface;
     }
 }

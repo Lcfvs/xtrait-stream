@@ -37,7 +37,7 @@ namespace XTrait\Stream {
          */
         public function createStreamFromFile(
             string $filename,
-            string $mode = 'r'
+            string $mode = FlagInterface::FLAG_R_BOF_BIN
         ): StreamInterface;
 
         /**
@@ -46,7 +46,6 @@ namespace XTrait\Stream {
          * The stream MUST be readable and may be writable.
          *
          * @param resource|object $resource PHP resource to use as basis of stream.
-         *
          * @return StreamInterface
          */
         public function createStreamFromResource(

@@ -44,11 +44,11 @@ namespace XTrait\Stream\Factory {
         }
 
         /**
-         * @param $resource
+         * @param resource|object $resource
          * @return StreamInterface
          */
         public function createStreamFromResource(
-            $resource
+            object $resource
         ): StreamInterface
         {
             return $this->createStreamFromFile('')
