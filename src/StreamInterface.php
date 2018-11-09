@@ -22,20 +22,6 @@ namespace XTrait\Stream {
     interface StreamInterface
     {
         /**
-         * StreamTrait constructor.
-         * @param string $filename
-         * @param string $mode
-         * @param bool $useIncludePath
-         * @param resource|object|null $context
-         */
-        public function __construct(
-            string $filename,
-            string $mode = FlagInterface::FLAG_R_BOF_BIN,
-            bool $useIncludePath = false,
-            object $context = null
-        );
-
-        /**
          * Reads all data from the stream into a string, from the beginning to end.
          *
          * This method MUST attempt to seek to the beginning of the stream before
@@ -60,6 +46,20 @@ namespace XTrait\Stream {
         public function withResource(
             object $resource
         );
+
+        /**
+         * @param string $filename
+         * @param string $mode
+         * @param bool $useIncludePath
+         * @param object|null $context
+         * @return static|StreamInterface
+         */
+        public function withFilename(
+            string $filename,
+            string $mode = FlagInterface::FLAG_R_BOF_BIN,
+            bool $useIncludePath = false,
+            object $context = null
+        ): StreamInterface;
 
         /**
          * Returns the resource

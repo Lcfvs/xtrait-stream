@@ -37,26 +37,6 @@ namespace XTrait\Stream {
         private $context;
 
         /**
-         * StreamTrait constructor.
-         * @param string $filename
-         * @param string $mode
-         * @param bool $useIncludePath
-         * @param resource|object|null $context
-         */
-        public function __construct(
-            string $filename,
-            string $mode = FlagInterface::FLAG_R_BOF_BIN,
-            bool $useIncludePath = false,
-            object $context = null
-        )
-        {
-            $this->filename = $filename;
-            $this->mode = $mode;
-            $this->useIncludePath = $useIncludePath;
-            $this->context = $context;
-        }
-
-        /**
          * @return string
          */
         public function __toString()
@@ -78,16 +58,40 @@ namespace XTrait\Stream {
 
         /**
          * @param bool|null|resource $resource
-         * @return static
+         * @return static|StreamInterface
          */
         public function withResource(
             $resource = null
         ): StreamInterface
         {
             return (clone $this)
+                ->setContext(null)
                 ->setFilename(null)
                 ->setMode(null)
-                ->setResource($resource);
+                ->setResource($resource)
+                ->setUseIncludePath(false);
+        }
+
+        /**
+         * @param string $filename
+         * @param string $mode
+         * @param bool $useIncludePath
+         * @param object|null $context
+         * @return static|StreamInterface
+         */
+        public function withFilename(
+            string $filename,
+            string $mode = FlagInterface::FLAG_R_BOF_BIN,
+            bool $useIncludePath = false,
+            object $context = null
+        ): StreamInterface
+        {
+            return (clone $this)
+                ->setContext($context)
+                ->setFilename($filename)
+                ->setMode($mode)
+                ->setResource(null)
+                ->setUseIncludePath($useIncludePath);
         }
 
         /**
@@ -103,7 +107,7 @@ namespace XTrait\Stream {
         }
 
         /**
-         * @return $this
+         * @return $this|StreamInterface
          */
         public function open(): StreamInterface
         {
@@ -130,7 +134,7 @@ namespace XTrait\Stream {
         }
 
         /**
-         * @return $this
+         * @return $this|StreamInterface
          */
         public function close(): StreamInterface
         {
@@ -141,8 +145,10 @@ namespace XTrait\Stream {
                 fclose($resource);
 
                 if (strlen($uri) && !is_file($uri)) {
+                    $this->setContext(null);
                     $this->setFilename(null);
                     $this->setMode(null);
+                    $this->setUseIncludePath(null);
                 }
             }
 
@@ -152,14 +158,14 @@ namespace XTrait\Stream {
         }
 
         /**
-         * @inheritDoc
+         * @return resource|bool|null
          */
         public function detach()
         {
             $resource = $this->resource;
 
             if ($resource) {
-                $this->resource = null;
+                $this->setResource(null);
             }
 
             return $resource;
@@ -234,7 +240,7 @@ namespace XTrait\Stream {
 
         /**
          * @param bool|null &$success
-         * @return $this
+         * @return $this|StreamInterface
          * @throws RuntimeException on failure.
          */
         public function rewind(
@@ -335,7 +341,7 @@ namespace XTrait\Stream {
          * @param string $target
          * @param resource|object|null $context
          * @param StreamInterface|null &$newStream
-         * @return $this
+         * @return $this|StreamInterface
          * @throws RuntimeException
          */
         public function copy(
@@ -369,7 +375,7 @@ namespace XTrait\Stream {
          * @param string $target
          * @param resource|object|null $context
          * @param StreamInterface|null &$newStream
-         * @return $this
+         * @return $this|StreamInterface
          * @throws RuntimeException
          */
         public function rename(
@@ -482,6 +488,19 @@ namespace XTrait\Stream {
         )
         {
             $this->mode = $mode;
+
+            return $this;
+        }
+
+        /**
+         * @param bool $useIncludePath
+         * @return $this
+         */
+        private function setUseIncludePath(
+            bool $useIncludePath = false
+        )
+        {
+            $this->useIncludePath = $useIncludePath;
 
             return $this;
         }

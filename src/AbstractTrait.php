@@ -7,19 +7,6 @@ namespace XTrait\Stream {
     trait AbstractTrait
     {
         /**
-         * @param string $filename
-         * @param string $mode
-         * @param bool $useIncludePath
-         * @param resource|object|null $context
-         */
-        abstract public function __construct(
-            string $filename,
-            string $mode = FlagInterface::FLAG_R_BOF_BIN,
-            bool $useIncludePath = false,
-            object $context = null
-        );
-
-        /**
          * @return string
          */
         abstract public function __toString();
@@ -30,6 +17,20 @@ namespace XTrait\Stream {
          */
         abstract public function withResource(
             object $resource
+        ): StreamInterface;
+
+        /**
+         * @param string $filename
+         * @param string $mode
+         * @param bool $useIncludePath
+         * @param object|null $context
+         * @return static|StreamInterface
+         */
+        abstract public function withFilename(
+            string $filename,
+            string $mode = FlagInterface::FLAG_R_BOF_BIN,
+            bool $useIncludePath = false,
+            object $context = null
         ): StreamInterface;
 
         /**

@@ -1,6 +1,9 @@
 <?php
 
-namespace XTrait\Stream {
+namespace XTrait\Stream\Factory {
+
+    use XTrait\Stream\FlagInterface;
+    use XTrait\Stream\StreamInterface;
 
     /**
      * Interface FactoryInterface, INSPIRED on the PSR's StreamFactoryInterface.
