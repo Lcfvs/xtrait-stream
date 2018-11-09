@@ -6,7 +6,8 @@ namespace XTrait\Stream {
     use XTrait\Stream\Factory\FactoryTrait;
 
     class Factory
-        implements FactoryInterface
+        implements
+            FactoryInterface
     {
         use FactoryTrait;
     }
