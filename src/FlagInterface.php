@@ -4,7 +4,7 @@ namespace XTrait\Stream {
 
     interface FlagInterface
         extends
-            MODEInterface
+            ModeInterface
     {
         const FLAG_R_BOF = 'r';
         const FLAG_RW_BOF = 'r+';
