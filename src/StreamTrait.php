@@ -2,15 +2,12 @@
 
 namespace XTrait\Stream {
 
-    use Error;
-    use Exception;
     use InvalidArgumentException;
     use RuntimeException;
+    use Throwable;
 
     trait StreamTrait
     {
-        use AbstractTrait;
-
         /**
          * @var resource|bool|null $resource
          */
@@ -43,7 +40,7 @@ namespace XTrait\Stream {
         {
             try {
                 return (string) @file_get_contents($this->getUri());
-            } catch (Error | Exception $e) {}
+            } catch (Throwable $e) {}
 
             return '';
         }
@@ -414,7 +411,7 @@ namespace XTrait\Stream {
          * @throws RuntimeException
          */
         public function truncate(
-            int $size,
+            int $size = 0,
             bool &$success = null
         ): StreamInterface
         {

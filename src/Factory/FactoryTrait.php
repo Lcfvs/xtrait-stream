@@ -3,24 +3,23 @@
 namespace XTrait\Stream\Factory {
 
     use XTrait\Common;
-    use XTrait\Stream;
     use XTrait\Stream\FlagInterface;
     use XTrait\Stream\StreamInterface;
+    use XTrait\Stream\StreamTrait;
 
     trait FactoryTrait
     {
-        use AbstractTrait;
         use Common\FactoryTrait;
 
         /**
          * @param string $content
          * @return StreamInterface
          */
-        public function createStream(
+        public static function createStream(
             string $content = ''
         ): StreamInterface
         {
-            $stream = $this->createStreamFromResource(tmpfile());
+            $stream = static::createStreamFromResource(tmpfile());
             $stream->write($content);
 
             return $stream;
@@ -33,26 +32,42 @@ namespace XTrait\Stream\Factory {
          * @param resource|object|null $context
          * @return StreamInterface
          */
-        public function createStreamFromFile(
+        public static function createStreamFromFile(
             string $filename,
             string $mode = FlagInterface::FLAG_R_BOF_BIN,
             bool $useIncludePath = false,
             object $context = null
         ): StreamInterface
         {
-            return new Stream($filename, $mode, $useIncludePath, $context);
+            $stream = new class() implements
+                StreamInterface
+            {
+                use StreamTrait;
+            };
+
+            return $stream->withFilename(
+                $filename,
+                $mode,
+                $useIncludePath,
+                $context
+            );
         }
 
         /**
          * @param resource|object $resource
          * @return StreamInterface
          */
-        public function createStreamFromResource(
+        public static function createStreamFromResource(
             object $resource
         ): StreamInterface
         {
-            return $this->createStreamFromFile('')
-                ->withResource($resource);
+            $stream = new class() implements
+                StreamInterface
+            {
+                use StreamTrait;
+            };
+
+            return $stream->withResource($resource);
         }
     }
 }

@@ -276,7 +276,7 @@ namespace XTrait\Stream {
          *     truncating.
          */
         public function truncate(
-            int $size,
+            int $size = 0,
             bool &$success = null
         ): self;
 
